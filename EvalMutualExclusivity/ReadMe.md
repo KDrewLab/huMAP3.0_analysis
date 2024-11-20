@@ -17,8 +17,8 @@ Structures are sourced from Burke, D. F. et al. Towards a structurally resolved 
 # Example commandlines
 
 <details>
-	*Test*
 	<summary>Examples for running the scripts</summary>
+	
 	1. To run on a single example of paired structures,you pass the structure files and directly identify which are the unique and common chains for each structure to *evaluate_structure_overlap.py* :
 	
 	'''bash

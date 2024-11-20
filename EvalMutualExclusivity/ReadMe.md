@@ -19,6 +19,7 @@ Structures are sourced from Burke, D. F. et al. Towards a structurally resolved 
 <details>
 	<summary>Examples for running the scripts</summary>
 	1. To run on a single example of paired structures,you pass the structure files and directly identify which are the unique and common chains for each structure to *evaluate_structure_overlap.py* :
+	
 	'''bash
 	python3 evaluate_structure_overlap.py --pdb1 P62917-P62841.pdb --pdb2 P62917-P62847.pdb --common_ch1 "chain A" --common_ch2 "chain A" --test_ch1 "chain B" --test_ch2 "chain B"	
 	'''
@@ -26,9 +27,11 @@ Structures are sourced from Burke, D. F. et al. Towards a structurally resolved 
 	2. *process_dimer_pair_lines.py* will take an input of structure file names with two structures per line and feed them to the *evaluate_structure_overlap.py* to perform the alignment and evaluation for many structures. Example of the format can be found in the *example_pairs.txt* 
 	
 	3. For the structure of this script, it expects protein structures are annotated as protein pairs, where each protein/chain is identified in the PDB filename. For example: structure1 contains protein A and protein B with its name containing these two IDs separated by a delimiter.  
+ 
 	'''text
 	proteinA-proteinB
 	'''  
+ 
 	This delimiter is passed as an argument (e.g., *--pair_delim*)
 	
 	4. There should be a delimiter between the two structures (e.g., structure1 contains protein A and protein B, while structure2 contains protein A and protein C)

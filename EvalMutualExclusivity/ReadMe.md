@@ -2,14 +2,6 @@
 
 Structures are sourced from Burke, D. F. et al. Towards a structurally resolved human protein interaction network. Nat. Struct. Mol. Biol. 1–10 (2023) doi:10.1038/s41594-022-00910-8.
 
-<details open>
-<summary>Shopping list</summary>
-
-* <strong>Vegetables</strong>
-* <a href="http://www.google.com" target="_blank">Fruits</a>
-* Fish
-
-</details>
 
 # Installation
 

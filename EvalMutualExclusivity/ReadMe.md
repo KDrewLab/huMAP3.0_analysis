@@ -2,7 +2,7 @@
 
 Structures are sourced from Burke, D. F. et al. Towards a structurally resolved human protein interaction network. Nat. Struct. Mol. Biol. 1–10 (2023) doi:10.1038/s41594-022-00910-8.
 
-<details><summary>Hello</summary>World!</details>
+<details><summary>Hello</summary>[World!](http://www.google.com)</details>
 
 # Installation
 

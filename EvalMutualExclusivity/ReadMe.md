@@ -5,7 +5,7 @@ Structures are sourced from Burke, D. F. et al. Towards a structurally resolved 
 <details open>
 <summary>Shopping list</summary>
 
-* Vegetables
+* <strong>Vegetables</strong>
 * Fruits
 * Fish
 

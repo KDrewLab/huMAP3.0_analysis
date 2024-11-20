@@ -6,7 +6,7 @@ Structures are sourced from Burke, D. F. et al. Towards a structurally resolved 
 <summary>Shopping list</summary>
 
 * <strong>Vegetables</strong>
-* Fruits
+* <a href="http://www.google.com">Fruits</a>
 * Fish
 
 </details>

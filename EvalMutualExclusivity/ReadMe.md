@@ -6,51 +6,61 @@ Structures are sourced from Burke, D. F. et al. Towards a structurally resolved 
 # Installation
 
 <details>
-	<summary>Installation information</summary>
-	1. **PyMol** is needed to perform the alignments of the paired structures on the common subunit. We recommend using a conda environment with the open source version of PyMol. Version 3.0.0 was used at the time of script development. [Anaconda package for open-source PyMol](https://anaconda.org/conda-forge/pymol-open-source)
-	
-	2. If the plan is to run thousands of structures, it is recommended to parallelize the process. A straightforward way would be use [GNU Parallel] (https://www.gnu.org/software/parallel/parallel_tutorial.html)
-	
-	3. After, clone this repo and the user is ready to run the scripts and evaluate whether overlapping interfaces exist between unique protein subunits aligned to a common subunit. 
+  <summary>Installation information</summary>
+
+  1. **PyMol** is needed to perform the alignments of the paired structures on the common subunit. 
+     We recommend using a conda environment with the open-source version of PyMol. 
+     Version 3.0.0 was used at the time of script development. 
+     [Anaconda package for open-source PyMol](https://anaconda.org/conda-forge/pymol-open-source)
+
+  2. If the plan is to run thousands of structures, it is recommended to parallelize the process. 
+     A straightforward way would be to use [GNU Parallel](https://www.gnu.org/software/parallel/parallel_tutorial.html).
+
+  3. After cloning this repo, the user is ready to run the scripts and evaluate whether overlapping interfaces exist 
+     between unique protein subunits aligned to a common subunit.
 
 </details>
 
-# Example commandlines
+# Example Commandlines
 
 <details>
-	<summary>Examples for running the scripts</summary>
-	
-	1. To run on a single example of paired structures,you pass the structure files and directly identify which are the unique and common chains for each structure to *evaluate_structure_overlap.py* :
-	
-	<code>bash
-	python3 evaluate_structure_overlap.py --pdb1 P62917-P62841.pdb --pdb2 P62917-P62847.pdb --common_ch1 "chain A" --common_ch2 "chain A" --test_ch1 "chain B" --test_ch2 "chain B"	
-	</code>
-	
-	2. *process_dimer_pair_lines.py* will take an input of structure file names with two structures per line and feed them to the *evaluate_structure_overlap.py* to perform the alignment and evaluation for many structures. Example of the format can be found in the *example_pairs.txt* 
-	
-	3. For the structure of this script, it expects protein structures are annotated as protein pairs, where each protein/chain is identified in the PDB filename. For example: structure1 contains protein A and protein B with its name containing these two IDs separated by a delimiter.  
- 
-	'''text
-	proteinA-proteinB
-	'''  
- 
-	This delimiter is passed as an argument (e.g., *--pair_delim*)
-	
-	4. There should be a delimiter between the two structures (e.g., structure1 contains protein A and protein B, while structure2 contains protein A and protein C)
-	'''text
-	proteinA-proteinB proteinA-proteinC
-	'''
-	This delimiter is passed as an argument (e.g., *--dimer_delim*)
+  <summary>Examples for running the scripts</summary>
 
-	5. Example running from the command-line using a text file input:
-	'''bash
-	while IFS= read -r line; do python3 ./process_dimer_pair_lines.py --input_line "$line" --pair_delim '-' --dimer_delim ' '; done < example_pairs.txt
-	'''
+  1. To run on a single example of paired structures, pass the structure files and directly identify which are the unique and common chains for each structure to `evaluate_structure_overlap.py`:
 
-	6. Optionally, you can parallelize this process. Here is a command-line example using GNU parallel:
-	'''bash
-	cat example_pairs.txt | parallel -j 10 python3 ./process_dimer_pair_lines.py --input_line '{}' --pair_delim '-' --dimer_delim '\ '
-	'''
+     ```bash
+     python3 evaluate_structure_overlap.py --pdb1 P62917-P62841.pdb --pdb2 P62917-P62847.pdb --common_ch1 "chain A" --common_ch2 "chain A" --test_ch1 "chain B" --test_ch2 "chain B"
+     ```
+
+  2. The script `process_dimer_pair_lines.py` will take an input of structure file names with two structures per line and feed them to the `evaluate_structure_overlap.py` to perform the alignment and evaluation for many structures. An example of the format can be found in the `example_pairs.txt`.
+
+  3. For this script, it expects protein structures to be annotated as protein pairs, where each protein/chain is identified in the PDB filename. For example, structure1 contains protein A and protein B, with its name containing these two IDs separated by a delimiter:
+
+     ```text
+     proteinA-proteinB
+     ```
+
+     This delimiter is passed as an argument (e.g., `--pair_delim`).
+
+  4. There should be a delimiter between the two structures (e.g., structure1 contains protein A and protein B, while structure2 contains protein A and protein C):
+
+     ```text
+     proteinA-proteinB proteinA-proteinC
+     ```
+
+     This delimiter is passed as an argument (e.g., `--dimer_delim`).
+
+  5. Example of running the command-line process using a text file input:
+
+     ```bash
+     while IFS= read -r line; do python3 ./process_dimer_pair_lines.py --input_line "$line" --pair_delim '-' --dimer_delim ' '; done < example_pairs.txt
+     ```
+
+  6. Optionally, you can parallelize this process. Here is a command-line example using GNU parallel:
+
+     ```bash
+     cat example_pairs.txt | parallel -j 10 python3 ./process_dimer_pair_lines.py --input_line '{}' --pair_delim '-' --dimer_delim '\ '
+     ```
 
 </details>
 

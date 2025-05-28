@@ -89,7 +89,7 @@ if __name__ == "__main__":
 
         # Seed params to evaluate_structure_overlap.py
         subprocess.run([
-            "python", "/stor/project/sfisch6/scripts/pymol_scripts/evaluate_structure_overlap.py",
+            "python", "/home/sfisch6/scripts/huMAP3.0/huMAP3.0_analysis/EvalMutualExclusivity/evaluate_structure_overlap.py",
             "--pdb1", pdb1,
             "--pdb2", pdb2,
             "--common_ch1", cmn_ch1,

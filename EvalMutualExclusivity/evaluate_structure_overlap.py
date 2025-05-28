@@ -44,7 +44,8 @@ def compare_overlap(pdb1, pdb2, common_ch1, common_ch2, test_ch1, test_ch2):
         cmd.load(pdb2, 'structure2')
 
         # align the common protein in both structures
-        cmd.align(f'structure1 and {common_ch1}', f'structure2 and {common_ch2}')
+        alignment = cmd.align(f'structure1 and {common_ch1}', f'structure2 and {common_ch2}')
+        rmsd = alignment[0]
 
         # select the interfaces between common proteins and defined unique proteins in each structure
         cmd.select('struct1_interface', f'byres (structure1 and {common_ch1}) within 4.0 of (structure1 and {test_ch1})')
@@ -54,21 +55,49 @@ def compare_overlap(pdb1, pdb2, common_ch1, common_ch2, test_ch1, test_ch2):
         cmd.select('interface_overlap', f'byres struct1_interface within 4.0 of struct2_interface')
         interface_overlap = cmd.get_model('interface_overlap')
 
-        # evaluate overlap of chains if it exists
-        cmd.select('chain_overlap', f'byres (structure1 and {test_ch1}) within 4.0 of (structure2 and {test_ch2})')
-        chain_overlap = cmd.get_model('chain_overlap')
+        # evaluate overlap of both test chains if it exists
+        cmd.select('chain_overlap_1', f'byres (structure1 and {test_ch1}) within 4.0 of (structure2 and {test_ch2})')
+        cmd.select('chain_overlap_2', f'byres (structure2 and {test_ch2}) within 4.0 of (structure1 and {test_ch1})')
+        chain_overlap_1 = cmd.get_model('chain_overlap_1')
+        chain_overlap_2 = cmd.get_model('chain_overlap_2')
 
         # collate overlap information
-        interface_overlap_atoms = set([atom.resi for atom in interface_overlap.atom])
-        chain_overlap_atoms = set([atom.resi for atom in chain_overlap.atom])
+        interface_overlap_atoms = {atom.resi for atom in interface_overlap.atom}
+        #chain_overlap_atoms = set([atom.resi for atom in chain_overlap.atom])
 
+        # define parsing functions for pymol to process
+        def store_chain_overlap(resi, resn, b):
+            chain1_overlap_tpl.append((f"{resi}{resn}", b))
+        def store_chain_overlap2(resi, resn, b):
+            chain2_overlap_tpl.append((f"{resi}{resn}", b))
+
+        # extract info per chain
+        chain1_overlap_tpl = []
+        cmd.iterate("chain_overlap_1 and name CA", "store_chain_overlap(resi, resn, b)", space={'store_chain_overlap': store_chain_overlap})
+        chain1_overlap_res = [tup[0] for tup in chain1_overlap_tpl]
+        chain1_overlap_pLDDT = [tup[1] for tup in chain1_overlap_tpl]
+        chain2_overlap_tpl = []
+        cmd.iterate("chain_overlap_2 and name CA", "store_chain_overlap2(resi, resn, b)", space={'store_chain_overlap2': store_chain_overlap2})
+        chain2_overlap_res = [tup[0] for tup in chain2_overlap_tpl]
+        chain2_overlap_pLDDT = [tup[1] for tup in chain2_overlap_tpl]
+
+        # calculate average pLDDT per chain overlap
+        av_pLDDT_chain_ov_1 = sum(chain1_overlap_pLDDT)/len(chain1_overlap_res) if chain1_overlap_res else None
+        av_pLDDT_chain_ov_2 = sum(chain2_overlap_pLDDT)/len(chain2_overlap_res) if chain2_overlap_res else None
+
+       # print(f"\n\ntest: {chain_overlap_test}")
         return {
             'interface_overlap': 'yes' if interface_overlap_atoms else 'no',
             'overlapping_intf_residues': interface_overlap_atoms,
             'num_of_overlapping_interface_res': len(interface_overlap_atoms),
-            'chain_overlap': 'yes' if chain_overlap_atoms else 'no',
-            'overlapping_chain_res': chain_overlap_atoms,
-            'num_overlapping_chain_res': len(chain_overlap_atoms)
+            'alignment_rmsd': rmsd,
+            'chain_overlap': 'yes' if (chain1_overlap_res or chain2_overlap_res) else 'no',
+            'overlapping_chain1_res': chain1_overlap_res,
+            'overlapping_chain2_res': chain2_overlap_res,
+            'num_overlapping_chain1_res': len(chain1_overlap_res),
+            'num_overlapping_chain2_res': len(chain2_overlap_res),
+            'chain1_overlap_av_pLDDT': av_pLDDT_chain_ov_1,
+            'chain2_overlap_av_pLDDT': av_pLDDT_chain_ov_2
             }   
     
     except pymol.CmdException as e:
@@ -91,16 +120,36 @@ if __name__ == "__main__":
                 f.write(f"Interface Overlap: {result['interface_overlap']}\n")
                 f.write(f"Overlapping Interface Residues: {result['overlapping_intf_residues']}\n")
                 f.write(f"Number of Overlapping Interface Residues: {result['num_of_overlapping_interface_res']}\n")
+                if isinstance(result['alignment_rmsd'], (int, float)):
+                    f.write(f"Alignment RMSD: {result['alignment_rmsd']:.2f}\n")
+                else:
+                    f.write("Alignment RMSD: N/A\n")
                 f.write(f"Chain Overlap: {result['chain_overlap']}\n")
-                f.write(f"Overlapping Chain Residues: {result['overlapping_chain_res']}\n")
-                f.write(f"Number of Overlapping Chain Residues: {result['num_overlapping_chain_res']}\n")
+                f.write(f"Overlapping Chain 1 Residues: {result['overlapping_chain1_res']}\n")
+                f.write(f"Number of Overlapping Chain 1 Residues: {result['num_overlapping_chain1_res']}\n")
+                if isinstance(result['chain1_overlap_av_pLDDT'], (int, float)):
+                    f.write(f"Average pLDDT for Overlapping Chain 1: {result['chain1_overlap_av_pLDDT']:.2f}\n")
+                else:
+                    f.write("Average pLDDT for Overlapping Chain 1: N/A\n")
+                f.write(f"Overlapping Chain 2 Residues: {result['overlapping_chain2_res']}\n")
+                f.write(f"Number of Overlapping Chain 2 Residues: {result['num_overlapping_chain2_res']}\n")
+                if isinstance(result['chain2_overlap_av_pLDDT'], (int, float)):
+                    f.write(f"Average pLDDT for Overlapping Chain 2: {result['chain2_overlap_av_pLDDT']:.2f}\n")
+                else:
+                    f.write("Average pLDDT for Overlapping Chain 2: N/A\n")
         else:
             print(f"Interface Overlap: {result['interface_overlap']}")
             print(f"Overlapping Interface Residues: {result['overlapping_intf_residues']}")
             print(f"Number of Overlapping Interface Residues: {result['num_of_overlapping_interface_res']}")
+            print(f"Alignment RMSD: {result['alignment_rmsd']:.2f}" if result['alignment_rmsd'] else "N/A")
             print(f"Chain Overlap: {result['chain_overlap']}")
-            print(f"Overlapping Chain Residues: {result['overlapping_chain_res']}")
-            print(f"Number of Overlapping Chain Residues: {result['num_overlapping_chain_res']}")
+            print(f"Overlapping Chain 1 Residues: {result['overlapping_chain1_res']}")
+            print(f"Number of Overlapping Chain 1 Residues: {result['num_overlapping_chain1_res']}")
+            print(f"Average pLDDT for Overlapping Chain 1: {result['chain1_overlap_av_pLDDT']:.2f}" if result['chain1_overlap_av_pLDDT'] else "N/A")
+            print(f"Overlapping Chain 2 Residues: {result['overlapping_chain2_res']}")
+            print(f"Number of Overlapping Chain 2 Residues: {result['num_overlapping_chain2_res']}")
+            print(f"Average pLDDT for Overlapping Chain 2: {result['chain2_overlap_av_pLDDT']:.2f}" if result['chain2_overlap_av_pLDDT'] else "N/A")
+
     
     except Exception as e:
         error_message = f"Error during overlap evaluation for PDBs {args.pdb1} and {args.pdb2} with chains {args.common_ch1}, {args.common_ch2}, {args.test_ch1}, {args.test_ch2}: {e}\n"
